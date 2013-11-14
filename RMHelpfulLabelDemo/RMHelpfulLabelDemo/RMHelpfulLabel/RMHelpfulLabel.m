@@ -13,6 +13,8 @@ static BOOL helpEnabled = NO;
 static UIFont *_infoFont;
 static UIColor *_infoFontColor;
 static NSString *_infoString;
+static id _delegate;
+static NSString *_OKText;
 
 @interface RMHelpfulLabel ()
 @end
@@ -74,6 +76,28 @@ static NSString *_infoString;
     return _infoString;
 }
 
++(void)setDelegate:(id)delegate
+{
+    _delegate = delegate;
+}
+
++(id)delegate
+{
+    return _delegate;
+}
+
++(void)setOKText:(NSString *)OKText
+{
+    _OKText = OKText;
+}
+
++(NSString *)OKText
+{
+    if (!_OKText) {
+        _OKText = @"Got it";
+    }
+    return _OKText;
+}
 
 #pragma mark - View lifecycle
 
@@ -114,6 +138,7 @@ static NSString *_infoString;
     if (enable) {
         if ([self.helpText length]) {
             NSLog(@"Got help text: %@", self.helpText);
+            
             gestureRecogniser = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showHelp:)];
             gestureRecogniser.numberOfTapsRequired = 1;
             [self addGestureRecognizer:gestureRecogniser];
@@ -121,11 +146,17 @@ static NSString *_infoString;
             self.clipsToBounds = NO;
             [self sizeToFit];
             
-            infoLabel = [[UILabel alloc] init];
-            infoLabel.text = self.infoString ? self.infoString : [[self class] infoString];
-            infoLabel.font = self.infoFont ? self.infoFont : [[self class] infoFont];
-            infoLabel.textColor = self.infoFontColor ? self.infoFontColor : [[self class] infoFontColor];
-            [infoLabel sizeToFit];
+            // The delegate can provide an info label
+            if ([[self class] delegate] != nil && [[[self class] delegate] respondsToSelector:@selector(infoLabelForHelpfulLabel:)]) {
+                infoLabel = [[[self class] delegate] infoLabelForHelpfulLabel:self];
+            }
+            else {
+                infoLabel = [[UILabel alloc] init];
+                infoLabel.text = self.infoString ? self.infoString : [[self class] infoString];
+                infoLabel.font = self.infoFont ? self.infoFont : [[self class] infoFont];
+                infoLabel.textColor = self.infoFontColor ? self.infoFontColor : [[self class] infoFontColor];
+                [infoLabel sizeToFit];
+            }
             
             [self addSubview:infoLabel];
             
@@ -158,6 +189,17 @@ static NSString *_infoString;
 
 -(void)showHelp:(id)sender
 {
+    // The delegate can handle the help action
+    if ([[self class] delegate] != nil && [[[self class] delegate] respondsToSelector:@selector(labelActionForHelpfulLabel:withSender:)]) {
+        [[[self class] delegate] labelActionForHelpfulLabel:self withSender:sender];
+    }
+    else {
+        [self doDefaultHelpAction];
+    }
+}
+
+-(void)doDefaultHelpAction
+{
     NSString *text = self.helpText;
     NSString *title = self.helpTitle;
     
@@ -165,7 +207,7 @@ static NSString *_infoString;
                                 message:text
                                delegate:self
                       cancelButtonTitle:Nil
-                      otherButtonTitles:[self.helpOKText length] ? self.helpOKText : @"Got it", nil] show];
+                      otherButtonTitles:[self.helpOKText length] ? self.helpOKText : [[self class] OKText], nil] show];
 }
 
 @end
