@@ -14,7 +14,6 @@
 @end
 
 @implementation ViewController {
-    
     IBOutlet UISwitch *toggleHelpSwitch;
     IBOutlet UIView *labelContainer;
 }
@@ -26,13 +25,19 @@
     
     [toggleHelpSwitch setOn:NO];
     
-    [RMHelpfulLabel setInfoFontColor:[UIColor redColor]];
-    [RMHelpfulLabel setInfoString:@"info"];
+    // Class-level configuration.  We can change colour, default info text displayed, etc.
+    // For more control a delegate can be set that generates the labels and handles the help action.
+    //[RMHelpfulLabel setInfoFontColor:[UIColor redColor]];
+    //[RMHelpfulLabel setInfoString:@"info"];
+    //[RMHelpfulLabel setDelegate:self];
+    //[RMHelpfulLabel setOKText:@"OK"];
     
-    RMHelpfulLabel *label = [[RMHelpfulLabel alloc] initWithFrame:CGRectMake(0,0,320,100)];
+    // Create a label manually, overriding some of the defaults
+    RMHelpfulLabel *label = [[RMHelpfulLabel alloc] initWithFrame:CGRectMake(20,0,300,100)];
     label.text = @"Manually created Helpful Label";
     label.helpText = @"Manually created help";
     label.helpTitle = @"Manually created title";
+    label.infoFont = [UIFont fontWithName:@"HelveticaNeue-Light" size:14];
     label.infoFontColor = [UIColor blueColor];
     label.infoString = @"Tell me";
     [label sizeToFit];
@@ -47,6 +52,23 @@
 
 - (IBAction)toggleHelp:(id)sender {
     [RMHelpfulLabel setHelpEnabled:[toggleHelpSwitch isOn]];
+}
+
+#pragma mark - <RMHelpfulLabelDelegate>
+
+-(id)infoLabelForHelpfulLabel:(RMHelpfulLabel *)helpfulLabel
+{
+    UILabel *infoLabel = [[UILabel alloc] init];
+    infoLabel.text = @"?";
+    infoLabel.textColor = [UIColor yellowColor];
+    [infoLabel sizeToFit];
+    return infoLabel;
+}
+
+-(void)labelActionForHelpfulLabel:(RMHelpfulLabel *)helpfulLAbel withSender:(id)sender
+{
+    NSLog(@"Action taken for label: %@, sender: %@", helpfulLAbel, sender);
+    [helpfulLAbel doDefaultHelpAction];
 }
 
 @end

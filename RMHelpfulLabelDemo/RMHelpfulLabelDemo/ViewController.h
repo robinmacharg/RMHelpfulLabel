@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "RMHelpfulLabel.h"
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <RMHelpfulLabelDelegate>
 
 @end
