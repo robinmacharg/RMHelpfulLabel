@@ -137,8 +137,6 @@ static NSString *_OKText;
 {
     if (enable) {
         if ([self.helpText length]) {
-            NSLog(@"Got help text: %@", self.helpText);
-            
             gestureRecogniser = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showHelp:)];
             gestureRecogniser.numberOfTapsRequired = 1;
             [self addGestureRecognizer:gestureRecogniser];
